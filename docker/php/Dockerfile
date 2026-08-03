@@ -29,8 +29,10 @@ RUN useradd -G www-data,root -u 1000 -d /home/laravel laravel \
     && mkdir -p /home/laravel/.composer \
     && chown -R laravel:laravel /home/laravel
 
-# Set permissions for Laravel directories
-RUN chmod -R 775 storage bootstrap/cache
+# Create Laravel directories if they don't exist and set permissions
+RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && chown -R laravel:laravel storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Configure PHP
 COPY php.ini /usr/local/etc/php/php.ini
