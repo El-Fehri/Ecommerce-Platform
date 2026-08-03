@@ -1,48 +1,77 @@
 ```
+# Laravel-specific ignores
+vendor/
+bootstrap/cache/
+storage/logs/
+storage/framework/
+public/storage
+.env
+.env.*
+!.env.example
+
+# Compiled and build artifacts
+*.php~
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
 # Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+.npm
+.bower
+bower_components/
+jspm_packages/
+node_modules/
+jam/
+packages/
+lib/
+target/
+.gradle/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
 
-# Environment variables
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.backup
+
+# Environment
+.env
 .env.local
 .env.*
 
-# Build outputs
-dist/
-build/
-target/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Logs
-*.log
-
-# Editor/IDE
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
+*~
 
-# OS
+# System
 .DS_Store
 Thumbs.db
+desktop.ini
+ehthumbs.db
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# MyPy
-.mypy_cache/
-
-# Pytest
-.pytest_cache/
-
-# Compressed files
+# Archive
 *.zip
 *.gz
 *.tar
@@ -61,4 +90,8 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
