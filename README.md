@@ -14,7 +14,7 @@
 
 ```bash
 cd /workspace
-git clone <repository-url> .
+git clone https://github.com/El-Fehri/Ecommerce-Platform.git
 ```
 
 ### 2. Environment Setup
