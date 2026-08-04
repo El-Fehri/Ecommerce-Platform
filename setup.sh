@@ -75,14 +75,8 @@ fi
 
 # Check if APP_KEY is set
 if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env"; then
-    echo -e "${YELLOW}⚠️  APP_KEY is not set. Generating application key...${NC}"
-    cd "${BACKEND_DIR}"
-    if command -v php &> /dev/null; then
-        php artisan key:generate
-    else
-        echo "PHP not available locally. Key will be generated in container."
-    fi
-    echo -e "${GREEN}✅ APP_KEY generated${NC}"
+    echo -e "${YELLOW}⚠️  APP_KEY is not set. Will generate after containers start...${NC}"
+    echo "   (Key generation will happen inside Docker container)"
 else
     echo -e "${GREEN}✅ APP_KEY is already set${NC}"
 fi
@@ -112,8 +106,16 @@ docker compose up -d
 
 # Wait for MySQL to be ready
 echo ""
-echo -e "${YELLOW}Waiting for MySQL to be ready...${NC}"
-sleep 10
+echo -e "${YELLOW}Waiting for services to be ready...${NC}"
+sleep 15
+
+# Generate APP_KEY if not set (inside container)
+if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env"; then
+    echo -e "${BLUE}Generating application key inside container...${NC}"
+    docker compose exec -T php php artisan key:generate || {
+        echo -e "${YELLOW}⚠️  Key generation failed. You can run it manually later.${NC}"
+    }
+fi
 
 # Run migrations inside container
 echo -e "${BLUE}Running database migrations...${NC}"

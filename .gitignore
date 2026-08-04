@@ -1,1 +1,1 @@
-(empty)
+Nothing should be ignored based on the provided file changes. The only modified file is `setup.sh`, which is a shell script and should not be added to .gitignore according to the rules.
