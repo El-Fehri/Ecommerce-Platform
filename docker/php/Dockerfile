@@ -40,7 +40,7 @@ RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessio
     && chmod -R 775 storage bootstrap/cache
 
 # Configure PHP
-COPY php.ini /usr/local/etc/php/php.ini
+COPY docker/php/php.ini /usr/local/etc/php/php.ini
 
 # Expose port 9000
 EXPOSE 9000

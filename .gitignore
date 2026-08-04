@@ -1,79 +1,70 @@
-# Laravel-specific ignores
-vendor/
-storage/
-bootstrap/cache/
-public/storage/
-
-# Environment
-.env
-.env.local
-.env.*
-
+```
 # Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+dist/
+build/
+target/
+.gradle/
 
-# Compiled and build artifacts
+# Compiled files
+*.pyc
+*.class
 *.o
-*.obj
 *.exe
 *.dll
 *.so
 *.a
+*.obj
 *.out
 
-# Logs and temp files
-*.log
-*.tmp
+# Editor/IDE files
+.vscode/
+.idea/
 *.swp
 *.swo
+*.tmp
 
-# Cache directories
-.cache/
-.php_cs.cache
-.ide-helper.meta
-_ide_helper.php
-
-# OS generated files
+# System files
 .DS_Store
 Thumbs.db
-
-# Editors
-.vscode/
-.idea/
-
-# Testing
-.phpunit.result.cache
-```
-
-+++ .gitignore (修改后)
-```
-# Dependencies
-node_modules/
-vendor/
-composer.lock
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# Editors
-.vscode/
-.idea/
+# Logs
+*.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
-# Docker related
-.dockerenv
-!docker/
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
