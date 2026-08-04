@@ -47,7 +47,6 @@ EXPOSE 9000
 
 CMD ["php-fpm"]
 
-+++ docker/php/Dockerfile (修改后)
      1	FROM php:8.3-fpm
      2	
      3	# Set working directory
