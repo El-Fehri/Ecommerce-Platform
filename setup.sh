@@ -73,12 +73,16 @@ else
     echo -e "${GREEN}✅ .env file already exists${NC}"
 fi
 
-# Check if APP_KEY is set
-if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env"; then
-    echo -e "${YELLOW}⚠️  APP_KEY is not set. Will generate after containers start...${NC}"
-    echo "   (Key generation will happen inside Docker container)"
+# Check if APP_KEY is set (only if .env exists)
+if [ -f "${BACKEND_DIR}/.env" ]; then
+    if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" 2>/dev/null || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env" 2>/dev/null; then
+        echo -e "${YELLOW}⚠️  APP_KEY is not set. Will generate after containers start...${NC}"
+        echo "   (Key generation will happen inside Docker container)"
+    else
+        echo -e "${GREEN}✅ APP_KEY is already set${NC}"
+    fi
 else
-    echo -e "${GREEN}✅ APP_KEY is already set${NC}"
+    echo -e "${YELLOW}⚠️  APP_KEY will be generated after containers start...${NC}"
 fi
 
 echo ""
@@ -111,13 +115,20 @@ sleep 15
 
 # Install Composer dependencies inside container FIRST
 echo -e "${BLUE}Installing Composer dependencies inside container...${NC}"
-docker compose exec -T php composer install --no-interaction --prefer-dist --optimize-autoloader || {
+if ! docker compose exec -T php composer install --no-interaction --prefer-dist --optimize-autoloader; then
     echo -e "${RED}❌ Composer install failed.${NC}"
-    exit 1
-}
+    echo "Trying to continue with setup, but you may need to run composer install manually."
+fi
 
 # Generate APP_KEY if not set (inside container)
-if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env"; then
+if [ -f "${BACKEND_DIR}/.env" ]; then
+    if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" 2>/dev/null || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env" 2>/dev/null; then
+        echo -e "${BLUE}Generating application key inside container...${NC}"
+        docker compose exec -T php php artisan key:generate || {
+            echo -e "${YELLOW}⚠️  Key generation failed. You can run it manually later.${NC}"
+        }
+    fi
+else
     echo -e "${BLUE}Generating application key inside container...${NC}"
     docker compose exec -T php php artisan key:generate || {
         echo -e "${YELLOW}⚠️  Key generation failed. You can run it manually later.${NC}"
@@ -126,20 +137,20 @@ fi
 
 # Run migrations inside container
 echo -e "${BLUE}Running database migrations...${NC}"
-docker compose exec -T php php artisan migrate --force || {
+if ! docker compose exec -T php php artisan migrate --force; then
     echo -e "${YELLOW}⚠️  Database migrations failed. Database might not be ready yet.${NC}"
     echo "You can run migrations manually later with: docker compose exec php php artisan migrate"
-}
+fi
 
 # Create storage link
 echo -e "${BLUE}Creating storage link...${NC}"
-docker compose exec -T php php artisan storage:link || true
+docker compose exec -T php php artisan storage:link 2>/dev/null || true
 
 # Clear caches
 echo -e "${BLUE}Clearing caches...${NC}"
-docker compose exec -T php php artisan config:clear || true
-docker compose exec -T php php artisan cache:clear || true
-docker compose exec -T php php artisan route:clear || true
+docker compose exec -T php php artisan config:clear 2>/dev/null || true
+docker compose exec -T php php artisan cache:clear 2>/dev/null || true
+docker compose exec -T php php artisan route:clear 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
