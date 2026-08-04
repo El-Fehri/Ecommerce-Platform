@@ -109,6 +109,13 @@ echo ""
 echo -e "${YELLOW}Waiting for services to be ready...${NC}"
 sleep 15
 
+# Install Composer dependencies inside container FIRST
+echo -e "${BLUE}Installing Composer dependencies inside container...${NC}"
+docker compose exec -T php composer install --no-interaction --prefer-dist --optimize-autoloader || {
+    echo -e "${RED}❌ Composer install failed.${NC}"
+    exit 1
+}
+
 # Generate APP_KEY if not set (inside container)
 if grep -q "^APP_KEY=$" "${BACKEND_DIR}/.env" || ! grep -q "^APP_KEY=" "${BACKEND_DIR}/.env"; then
     echo -e "${BLUE}Generating application key inside container...${NC}"
