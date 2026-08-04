@@ -149,6 +149,15 @@ docker compose up -d
 docker compose exec php php artisan migrate:fresh --seed
 ```
 
+**Common Build Error: php.ini not found**
+
+If you see an error like `COPY php.ini /usr/local/etc/php/php.ini: not found`, ensure the Dockerfile references the correct path:
+
+```dockerfile
+# In docker/php/Dockerfile, use:
+COPY docker/php/php.ini /usr/local/etc/php/php.ini
+```
+
 ## Service URLs
 
 After successful setup:
