@@ -1,128 +1,80 @@
---- docker-compose.yml (原始)
 version: '3.8'
 
 services:
-  # Nginx Web Server
-  nginx:
-    image: nginx:alpine
-    container_name: saas_ecommerce_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./backend:/var/www/html
-      - ./frontend/dist:/var/www/frontend
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
-      - ./docker/nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - php
-      - mysql
-    networks:
-      - saas_network
-
-  # PHP-FPM
   php:
     build:
-      context: ./docker/php
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/php/Dockerfile
     container_name: saas_ecommerce_php
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./backend:/var/www/html
-      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    networks:
+      - saas_network
     depends_on:
       - mysql
       - redis
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: saas_ecommerce_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
     networks:
       - saas_network
+    depends_on:
+      - php
 
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: saas_ecommerce_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${DB_DATABASE:-saas_ecommerce}
-      MYSQL_USER: ${DB_USERNAME:-saas_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-saas_password}
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+      MYSQL_DATABASE: ecommerce
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: ecommerce
+      MYSQL_PASSWORD: secret
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
       - saas_network
 
-  # Redis
   redis:
     image: redis:alpine
     container_name: saas_ecommerce_redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
     ports:
       - "6379:6379"
     networks:
       - saas_network
 
-  # Node.js for Frontend Build
   node:
     image: node:20-alpine
     container_name: saas_ecommerce_node
     restart: unless-stopped
-    working_dir: /var/www/frontend
+    working_dir: /var/www/html
     volumes:
-      - ./frontend:/var/www/frontend
-      - node_modules:/var/www/frontend/node_modules
+      - ./frontend:/var/www/html
+      - /var/www/html/node_modules
     ports:
       - "5173:5173"
-    command: npm run dev -- --host
+    command: sh -c "npm install && npm run dev -- --host"
     networks:
       - saas_network
 
-  # Laravel Horizon (Queue Worker)
-  horizon:
-    build:
-      context: ./docker/php
-      dockerfile: Dockerfile
-    container_name: saas_ecommerce_horizon
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - ./backend:/var/www/html
-    depends_on:
-      - php
-      - redis
-    command: php artisan horizon
-    networks:
-      - saas_network
-
-  # Laravel Scheduler
-  scheduler:
-    build:
-      context: ./docker/php
-      dockerfile: Dockerfile
-    container_name: saas_ecommerce_scheduler
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - ./backend:/var/www/html
-    depends_on:
-      - php
-      - mysql
-      - redis
-    command: >
-      sh -c "while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"
-    networks:
-      - saas_network
-
-  # Mailhog (Development)
   mailhog:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:latest
     container_name: saas_ecommerce_mailhog
     restart: unless-stopped
     ports:
@@ -131,148 +83,38 @@ services:
     networks:
       - saas_network
 
-networks:
-  saas_network:
-    driver: bridge
-
-volumes:
-  mysql_data:
-    driver: local
-  redis_data:
-    driver: local
-  node_modules:
-    driver: local
-
-+++ docker-compose.yml (修改后)
-services:
-  # Nginx Web Server
-  nginx:
-    image: nginx:alpine
-    container_name: saas_ecommerce_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./backend:/var/www/html
-      - ./frontend/dist:/var/www/frontend
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
-      - ./docker/nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - php
-      - mysql
-    networks:
-      - saas_network
-
-  # PHP-FPM
-  php:
-    build:
-      context: ./docker/php
-      dockerfile: Dockerfile
-    container_name: saas_ecommerce_php
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - ./backend:/var/www/html
-      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
-    depends_on:
-      - mysql
-      - redis
-    networks:
-      - saas_network
-
-  # MySQL Database
-  mysql:
-    image: mysql:8.0
-    container_name: saas_ecommerce_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${DB_DATABASE:-saas_ecommerce}
-      MYSQL_USER: ${DB_USERNAME:-saas_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-saas_password}
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d
-    ports:
-      - "3306:3306"
-    networks:
-      - saas_network
-
-  # Redis
-  redis:
-    image: redis:alpine
-    container_name: saas_ecommerce_redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - saas_network
-
-  # Node.js for Frontend Build
-  node:
-    image: node:20-alpine
-    container_name: saas_ecommerce_node
-    restart: unless-stopped
-    working_dir: /var/www/frontend
-    volumes:
-      - ./frontend:/var/www/frontend
-      - node_modules:/var/www/frontend/node_modules
-    ports:
-      - "5173:5173"
-    command: npm run dev -- --host
-    networks:
-      - saas_network
-
-  # Laravel Horizon (Queue Worker)
   horizon:
     build:
-      context: ./docker/php
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/php/Dockerfile
     container_name: saas_ecommerce_horizon
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./backend:/var/www/html
-    depends_on:
-      - php
-      - redis
+      - /var/www/html/vendor
     command: php artisan horizon
     networks:
       - saas_network
+    depends_on:
+      - redis
+      - mysql
 
-  # Laravel Scheduler
   scheduler:
     build:
-      context: ./docker/php
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/php/Dockerfile
     container_name: saas_ecommerce_scheduler
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./backend:/var/www/html
+      - /var/www/html/vendor
+    command: php artisan schedule:work
+    networks:
+      - saas_network
     depends_on:
-      - php
       - mysql
-      - redis
-    command: >
-      sh -c "while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"
-    networks:
-      - saas_network
-
-  # Mailhog (Development)
-  mailhog:
-    image: mailhog/mailhog
-    container_name: saas_ecommerce_mailhog
-    restart: unless-stopped
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - saas_network
 
 networks:
   saas_network:
@@ -280,8 +122,4 @@ networks:
 
 volumes:
   mysql_data:
-    driver: local
-  redis_data:
-    driver: local
-  node_modules:
     driver: local
