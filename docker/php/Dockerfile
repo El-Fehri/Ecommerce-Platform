@@ -1,4 +1,3 @@
---- docker/php/Dockerfile (原始)
 FROM php:8.3-fpm
 
 # Set working directory
