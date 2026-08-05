@@ -1,43 +1,39 @@
 ```
-# Laravel-specific ignores
-vendor/
-composer.lock
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+htmlcov/
+
+# Environment variables
 .env
+.env.local
 .env.*
-bootstrap/cache/
-storage/logs/
-storage/framework/
-public/storage/
 
-# Database migrations (if auto-generated)
-database/seeds/
-database/factories/
-
-# IDE
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
-.DS_Store
-Thumbs.db
+*.tmp
 
 # Logs
 *.log
-storage/logs/*.log
 
-# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build
-public/build/
-mix-manifest.json
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Testing
-.phpunit.result.cache
-.php-cs-fixer.cache
+.pytest_cache/
+.mypy_cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
