@@ -332,35 +332,51 @@ MAIL_HOST=mailhog
 MAIL_PORT=1025
 MAIL_ENCRYPTION=null
 ```
-
-### PHP Configuration
-
-Custom PHP settings are in `docker/php/php.ini`. Common adjustments:
-
-```ini
-upload_max_filesize = 64M
-post_max_size = 64M
-memory_limit = 512M
-max_execution_time = 300
+---
+### Local Start
+1.  Install Dependencies Locally
 ```
-
-After changes, rebuild the PHP container:
-
-```bash
-docker compose build php
-docker compose restart php
+cd backend
+composer install
 ```
+```
+# For Ubuntu/Debian
+sudo apt-get install php8.3-cli php8.3-fpm php8.3-mysql php8.3-xml php8.3-curl php8.3-gd php8.3-imap php8.3-zip php8.3-intl php8.3-bcmath php8.3-mbstring
+```
+2. Set Up Environment
+```
+# Create .env file from example
+cp .env.example .env
 
-## 🎯 Next Steps
+# Generate application key
+php artisan key:generate
+```
+3. Configure Database
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ecommerce_platform
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+4. Run Migrations and Setup
+```
+php artisan migrate --seed
+php artisan storage:link
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+5. Start the Application
+```
+# Start Laravel development server
+php artisan serve
 
-1. ✅ Complete initial setup with `./setup.sh`
-2. ✅ Access http://localhost:8080 to verify installation
-3. 📝 Create your first admin/tenant user
-4. 🔐 Configure authentication (Sanctum/JWT)
-5. 💳 Set up payment gateways in `.env`
-6. 🎨 Customize frontend in `frontend/src/`
-7. 📦 Start building your SaaS features
-
+# In another terminal, start Vite for frontend assets
+npm install && npm run dev
+```
+--- 
 ## 📚 Additional Resources
 
 - [Laravel Documentation](https://laravel.com/docs)
