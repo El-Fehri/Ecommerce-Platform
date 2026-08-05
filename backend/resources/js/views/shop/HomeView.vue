@@ -1,15 +1,3 @@
---- backend/resources/js/views/shop/HomeView.vue (原始)
-<template>
-  <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">Home Shop</h1>
-    <p>Welcome to our e-commerce platform!</p>
-  </div>
-</template>
-
-<script setup lang="ts">
-</script>
-
-+++ backend/resources/js/views/shop/HomeView.vue (修改后)
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Navigation -->
